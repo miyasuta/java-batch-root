@@ -1,0 +1,7 @@
+@server=http://localhost:8080
+
+###
+POST {{server}}/odata/v4/CatalogService/postBatchv2
+Content-Type: application/json
+
+{}
