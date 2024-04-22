@@ -1,0 +1,29 @@
+@server=a2c7c84etrial-dev-salesorder-srv.cfapps.us10-001.hana.ondemand.com
+@authurl=https://a2c7c84etrial.authentication.us10.hana.ondemand.com
+@clientId=sb-salesorder-a2c7c84etrial-dev!t266030
+@clientSecret=p3Z/2ZhlBYShlIPoq6J6rivAizs=
+
+###
+# @name getCredentials
+POST {{authurl}}/oauth/token?grant_type=client_credentials
+Authorization: Basic {{clientId}} {{clientSecret}}
+
+@token =  {{getCredentials.response.body.access_token}}
+
+
+###
+POST {{server}}/odata/v2/sales/SalesOrders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "orderDate": "2024-04-23",
+    "customer": "SAP",
+    "items": [
+        {
+            "product": "PC",
+            "quantity": 1,
+            "price": 1000
+        }
+    ]
+}

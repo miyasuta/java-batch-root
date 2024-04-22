@@ -1,0 +1,17 @@
+@server=http://localhost:4004
+
+###
+POST {{server}}/odata/v4/sales/SalesOrders
+Content-Type: application/json
+
+{
+    "orderDate": "2024-04-23",
+    "customer": "SAP",
+    "items": [
+        {
+            "product": "PC",
+            "quantity": 1,
+            "price": 1000
+        }
+    ]
+}
