@@ -6,7 +6,7 @@ Content-Type: application/json
 
 {
     "orderDate": "2024-04-23",
-    "customer": "SAP",
+    "customer": "SAP2",
     "items": [
         {
             "product": "PC",

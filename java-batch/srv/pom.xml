@@ -148,8 +148,8 @@
 			<plugin>
 				<groupId>com.sap.cloud.sdk.datamodel</groupId>
 				<artifactId>odata-generator-maven-plugin</artifactId>
-				<!-- Please use the latest version here-->
-				<version>5.7.0</version>
+				<!-- Please use the latest version here
+				<version>5.7.0</version> -->
 				<executions>
 					<execution>
 						<id>generate-consumption</id>
