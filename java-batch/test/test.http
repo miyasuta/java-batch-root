@@ -1,7 +1,72 @@
 @server=http://localhost:8080
+@sales=http://localhost:4004
 
 ###
 POST {{server}}/odata/v4/CatalogService/postBatchv2
 Content-Type: application/json
 
 {}
+
+###
+POST {{sales}}/odata/v2/sales/$batch
+Content-Type: multipart/mixed; boundary=batch
+
+
+--batch
+Content-TYpe: multipart/mixed; boundary=changeset
+
+--changeset
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST SalesOrders HTTP/1.1
+Content-Type: application/json
+
+{
+    "orderDate": "2024-04-23",
+    "customer": "RestClient",
+    "items": [
+        {
+            "product": "PC",
+            "quantity": 1,
+            "price": 1000
+        }
+    ]
+}
+
+--changeset--
+
+--batch--
+
+###
+POST {{sales}}/odata/v2/sales/$batch
+Content-Type: application/json
+
+{
+    "requests": [
+        {
+            "id": "1",
+            "method": "POST",
+            "url": "/SalesOrders",
+            "headers": {
+                "content-type": "application/json",
+                "odata-version": "2.0"
+            },
+            "body": {
+                "orderDate": "2024-04-23",
+                "customer": "RestClient",
+                "items": [
+                    {
+                        "product": "PC",
+                        "quantity": 1,
+                        "price": 1000
+                    }
+                ]
+            }
+        }        
+    ]
+}
+
+
+
+

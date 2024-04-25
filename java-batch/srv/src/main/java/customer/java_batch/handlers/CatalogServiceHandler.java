@@ -14,8 +14,10 @@ import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
 
 import cds.gen.catalogservice.CatalogService_;
-import cds.gen.catalogservice.Books;
 import cds.gen.catalogservice.PostBatchv2Context;
+import cds.gen.catalogservice.PostOrderV2Context;
+import cds.gen.catalogservice.ReadOrderV2Context;
+import io.vavr.control.Try;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +25,12 @@ import org.slf4j.LoggerFactory;
 import com.sap.cloud.sdk.cloudplatform.connectivity.DestinationAccessor;
 import com.sap.cloud.sdk.cloudplatform.connectivity.HttpDestination;
 import com.sap.cloud.sdk.datamodel.odata.helper.ModificationResponse;
-
+import com.sap.cloud.sdk.datamodel.odata.helper.batch.BatchResponse;
+import com.sap.cloud.sdk.datamodel.odata.helper.batch.BatchResponseChangeSet;
 import com.mycompany.vdm.services.SalesServiceV2Service;
 import com.mycompany.vdm.namespaces.salesservicev2.SalesOrdersCreateFluentHelper;
 import com.mycompany.vdm.services.DefaultSalesServiceV2Service;
+import com.mycompany.vdm.namespaces.salesservicev2.OrderItems;
 import com.mycompany.vdm.namespaces.salesservicev2.SalesOrders;
 
 @Component
@@ -35,11 +39,39 @@ public class CatalogServiceHandler implements EventHandler {
 
 	Logger logger = LoggerFactory.getLogger(CatalogServiceHandler.class);
 
-	@After(event = CqnService.EVENT_READ)
-	public void discountBooks(Stream<Books> books) {
-		books.filter(b -> b.getTitle() != null && b.getStock() != null)
-		.filter(b -> b.getStock() > 200)
-		.forEach(b -> b.setTitle(b.getTitle() + " (discounted)"));
+	@On(event = ReadOrderV2Context.CDS_NAME)
+	public void ReadOrderV2(ReadOrderV2Context context) {
+		logger.info("Readv2 handler called");
+
+		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
+		DefaultSalesServiceV2Service service = new DefaultSalesServiceV2Service().withServicePath("/odata/v2/sales");
+
+		//Get request
+		final List<SalesOrders> salesorders = service.getAllSalesOrders().executeRequest(destination);
+		logger.info(salesorders.toString());
+		context.setResult(salesorders.toString());		
+	}
+
+	@On(event = PostOrderV2Context.CDS_NAME)
+	public void PostOrderv2(PostOrderV2Context context) {
+		logger.info("PostOrderv2 handler called");
+
+		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
+		DefaultSalesServiceV2Service service = new DefaultSalesServiceV2Service().withServicePath("/odata/v2/sales");
+
+		//Post request
+		SalesOrders salesorder = new SalesOrders();
+		salesorder.setCustomer("Java");
+		salesorder.setOrderDate(LocalDateTime.now());
+
+		OrderItems items = new OrderItems();
+		items.setProduct("Product A");
+		items.setPrice(1000);
+		items.setQuantity(1);
+		salesorder.addItems(items);
+
+		ModificationResponse<SalesOrders> response = service.createSalesOrders(salesorder).executeRequest(destination);
+		context.setResult(response.toString());
 	}
 
 	@On(event = PostBatchv2Context.CDS_NAME)
@@ -49,17 +81,26 @@ public class CatalogServiceHandler implements EventHandler {
 		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
 		DefaultSalesServiceV2Service service = new DefaultSalesServiceV2Service().withServicePath("/odata/v2/sales");
 
-		//Getリクエスト
-		// final List<SalesOrders> salesorders = service.getAllSalesOrders().executeRequest(destination);
-		// logger.info(salesorders.toString());
-		// context.setResult(salesorders.toString());
-
-		//Postリクエスト
 		SalesOrders salesorder = new SalesOrders();
 		salesorder.setCustomer("Java");
 		salesorder.setOrderDate(LocalDateTime.now());
-		ModificationResponse<SalesOrders> response = service.createSalesOrders(salesorder).executeRequest(destination);
-		context.setResult(response.toString());
+
+		OrderItems items = new OrderItems();
+		items.setProduct("Product A");
+		items.setPrice(1000);
+		items.setQuantity(1);
+		salesorder.addItems(items);
+
+		//batch call
+		BatchResponse result = service
+								.batch()
+								.beginChangeSet()
+								.createSalesOrders(salesorder)
+								.endChangeSet()
+								.executeRequest(destination);
+
+		Try<BatchResponseChangeSet> changeSetTry = result.get(0);
+		context.setResult(changeSetTry.toString());
 	}
 
 }
