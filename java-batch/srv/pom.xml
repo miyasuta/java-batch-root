@@ -162,7 +162,7 @@
 							<outputDirectory>${project.basedir}/src/gen/java</outputDirectory>
 							<deleteOutputDirectory>true</deleteOutputDirectory>
 							<packageName>com.mycompany.vdm</packageName>
-							<defaultBasePath>odata/v2/</defaultBasePath>
+							<defaultBasePath>odata/v2/sales/</defaultBasePath>
 							<compileScope>COMPILE</compileScope>
 							<serviceMethodsPerEntitySet>true</serviceMethodsPerEntitySet>
 							<!-- (Optional) You can add a custom copyright header:

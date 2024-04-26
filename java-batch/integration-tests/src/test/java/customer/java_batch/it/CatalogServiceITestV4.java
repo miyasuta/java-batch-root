@@ -26,7 +26,7 @@ class CatalogServiceITestV4 {
 
 	@Test
 	void dummy() throws Exception {
-		mockMvc.perform(get("/odata/v4/CatalogService/postOrderv2")
+		mockMvc.perform(get("/odata/v4/CatalogService/readOrderV2()")
 							.header("Authorization", basic("authenticated", "")))
 					.andExpect(status().isOk());
 	}

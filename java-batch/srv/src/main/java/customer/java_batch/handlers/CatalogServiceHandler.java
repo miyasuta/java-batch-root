@@ -14,7 +14,7 @@ import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
 
 import cds.gen.catalogservice.CatalogService_;
-import cds.gen.catalogservice.PostBatchv2Context;
+import cds.gen.catalogservice.PostBatchV2Context;
 import cds.gen.catalogservice.PostOrderV2Context;
 import cds.gen.catalogservice.ReadOrderV2Context;
 import io.vavr.control.Try;
@@ -74,12 +74,12 @@ public class CatalogServiceHandler implements EventHandler {
 		context.setResult(response.toString());
 	}
 
-	@On(event = PostBatchv2Context.CDS_NAME)
-	public void PostBatchv2(PostBatchv2Context context) {
+	@On(event = PostBatchV2Context.CDS_NAME)
+	public void PostBatchV2(PostBatchV2Context context) {
 		logger.info("PostBatchv2 handler called");
 
 		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
-		DefaultSalesServiceV2Service service = new DefaultSalesServiceV2Service().withServicePath("/odata/v2/sales");
+		DefaultSalesServiceV2Service service = new DefaultSalesServiceV2Service();//.withServicePath("/odata/v2/sales");
 
 		SalesOrders salesorder = new SalesOrders();
 		salesorder.setCustomer("Java");

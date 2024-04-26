@@ -2,7 +2,14 @@
 @sales=http://localhost:4004
 
 ###
-POST {{server}}/odata/v4/CatalogService/postBatchv2
+GET {{server}}/odata/v4/CatalogService/readOrderV2()
+
+###
+POST {{server}}/odata/v4/CatalogService/postOrderV2
+Content-Type: application/json
+
+###
+POST {{server}}/odata/v4/CatalogService/postBatchV2
 Content-Type: application/json
 
 {}
