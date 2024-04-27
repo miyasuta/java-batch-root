@@ -2,6 +2,9 @@
 @sales=http://localhost:4004
 
 ###
+GET {{server}}/odata/v4/CatalogService/$metadata
+
+###
 GET {{server}}/odata/v4/CatalogService/readOrderV4()
 
 ###
