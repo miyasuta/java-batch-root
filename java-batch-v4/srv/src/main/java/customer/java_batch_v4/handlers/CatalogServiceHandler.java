@@ -1,8 +1,10 @@
 package customer.java_batch_v4.handlers;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,7 @@ import cds.gen.catalogservice.CatalogService_;
 import cds.gen.catalogservice.PostBatchV4Context;
 import cds.gen.catalogservice.PostOrderV4Context;
 import cds.gen.catalogservice.ReadOrderV4Context;
+import io.vavr.control.Option;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,19 +43,44 @@ public class CatalogServiceHandler implements EventHandler {
 		logger.info("ReadV4 handler called");
 
 		// Get request
-		final List<SalesOrders> salesorders = service.getAllSalesOrders().execute(destination);
+		final List<SalesOrders> salesorders = service.getAllSalesOrders()
+				.select(SalesOrders.ID,
+						SalesOrders.CUSTOMER,
+						SalesOrders.ORDER_DATE,
+						SalesOrders.TO_ITEMS)
+				.execute(destination);
 		logger.info(salesorders.toString());
-		// List<cds.gen.catalogservice.SalesOrders> readorders = salesorders.stream()
-		// 		.map(salesorder -> {
-		// 			cds.gen.catalogservice.SalesOrders readorder = cds.gen.catalogservice.SalesOrders.create();
-		// 			readorder.setId(salesorder.getID().toString());
-		// 			readorder.setCustomer(salesorder.getCustomer());
-		// 			readorder.setOrderDate(salesorder.getOrderDate());
-		// 			return readorder;
-		// 		})
-		// 		.collect(Collectors.toList());
-		// context.setResult(readorders);
-		context.setResult(salesorders.toString());
+		List<cds.gen.catalogservice.SalesOrders> readorders = salesorders.stream()
+				.map(salesorder -> {
+					cds.gen.catalogservice.SalesOrders readorder = cds.gen.catalogservice.SalesOrders.create();
+					readorder.setId(salesorder.getID().toString());
+					readorder.setCustomer(salesorder.getCustomer());
+					readorder.setOrderDate(salesorder.getOrderDate());
+
+					List<cds.gen.catalogservice.OrderItems> readitems = salesorder.getItemsIfPresent()
+							.map(items -> items.stream() // List<OrderItems>をStreamに変換
+									.map(item -> {
+										cds.gen.catalogservice.OrderItems readItem = cds.gen.catalogservice.OrderItems
+												.create();
+										readItem.setId(item.getID().toString());
+										readItem.setOrderId(item.getOrder_ID().toString());
+										readItem.setProduct(item.getProduct());
+										readItem.setQuantity(item.getQuantity());
+										readItem.setPrice(item.getPrice());										
+										return readItem;
+									})
+									.collect(Collectors.toList())) // 変換したStreamをListに収集
+							.getOrElse(List.of());
+
+					if (readitems.size() > 0) {
+						readorder.setItems(readitems);
+					}
+
+					return readorder;
+				})
+				.collect(Collectors.toList());
+				
+		context.setResult(readorders);
 	}
 
 	@On(event = PostOrderV4Context.CDS_NAME)
