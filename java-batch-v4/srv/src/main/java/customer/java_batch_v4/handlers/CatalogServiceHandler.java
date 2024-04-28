@@ -2,9 +2,11 @@ package customer.java_batch_v4.handlers;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sap.cds.Result;
 import com.sap.cds.services.handler.EventHandler;
 import com.sap.cds.services.handler.annotations.On;
 import com.sap.cds.services.handler.annotations.ServiceName;
@@ -29,29 +31,35 @@ import com.mycompany.vdm.namespaces.salesservicev4.SalesOrders;
 @Component
 @ServiceName(CatalogService_.CDS_NAME)
 public class CatalogServiceHandler implements EventHandler {
-    Logger logger = LoggerFactory.getLogger(CatalogServiceHandler.class);
+	Logger logger = LoggerFactory.getLogger(CatalogServiceHandler.class);
+	HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
+	DefaultSalesServiceV4Service service = new DefaultSalesServiceV4Service().withServicePath("/odata/v4/sales");
 
-    @On(event = ReadOrderV4Context.CDS_NAME)
+	@On(event = ReadOrderV4Context.CDS_NAME)
 	public void ReadOrderV4(ReadOrderV4Context context) {
 		logger.info("ReadV4 handler called");
 
-		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
-		DefaultSalesServiceV4Service service = new DefaultSalesServiceV4Service().withServicePath("/odata/v4/sales");
-
-		//Get request
+		// Get request
 		final List<SalesOrders> salesorders = service.getAllSalesOrders().execute(destination);
 		logger.info(salesorders.toString());
-		context.setResult(salesorders.toString());		
+		// List<cds.gen.catalogservice.SalesOrders> readorders = salesorders.stream()
+		// 		.map(salesorder -> {
+		// 			cds.gen.catalogservice.SalesOrders readorder = cds.gen.catalogservice.SalesOrders.create();
+		// 			readorder.setId(salesorder.getID().toString());
+		// 			readorder.setCustomer(salesorder.getCustomer());
+		// 			readorder.setOrderDate(salesorder.getOrderDate());
+		// 			return readorder;
+		// 		})
+		// 		.collect(Collectors.toList());
+		// context.setResult(readorders);
+		context.setResult(salesorders.toString());
 	}
 
 	@On(event = PostOrderV4Context.CDS_NAME)
 	public void PostOrderv4(PostOrderV4Context context) {
 		logger.info("PostOrderV4 handler called");
 
-		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
-		DefaultSalesServiceV4Service service = new DefaultSalesServiceV4Service().withServicePath("/odata/v4/sales");
-
-		//Post request
+		// Post request
 		SalesOrders salesorder = new SalesOrders();
 		salesorder.setCustomer("Java");
 		salesorder.setOrderDate(LocalDate.now());
@@ -70,9 +78,6 @@ public class CatalogServiceHandler implements EventHandler {
 	public void PostBatchV4(PostBatchV4Context context) {
 		logger.info("PostBatchV4 handler called");
 
-		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
-		DefaultSalesServiceV4Service service = new DefaultSalesServiceV4Service().withServicePath("/odata/v4/sales");
-
 		SalesOrders salesorder = new SalesOrders();
 		salesorder.setCustomer("Java Batch");
 		salesorder.setOrderDate(LocalDate.now());
@@ -85,16 +90,15 @@ public class CatalogServiceHandler implements EventHandler {
 
 		CreateRequestBuilder<SalesOrders> createRequest = service.createSalesOrders(salesorder);
 
-		//batch call
-		try(
-			BatchResponse result = service
-			.batch()
-			.addChangeset(createRequest)
-			.execute(destination);
-		) {
+		// batch call
+		try (
+				BatchResponse result = service
+						.batch()
+						.addChangeset(createRequest)
+						.execute(destination);) {
 			ModificationResponse<SalesOrders> createResult = result.getModificationResult(createRequest);
 			context.setResult(createResult.toString());
-		}	
-		
-	}	
+		}
+
+	}
 }
