@@ -11,6 +11,20 @@ GET {{server}}/odata/v4/CatalogService/readOrderV4()
 POST {{server}}/odata/v4/CatalogService/postOrderV4
 Content-Type: application/json
 
+{
+    "order": {
+        "orderDate": "2024-04-29",
+        "customer": "Java",
+        "items": [
+            {
+                "product": "PC",
+                "quantity": 1,
+                "price": 1000
+            }
+        ]
+    }
+}
+
 ###
 POST {{server}}/odata/v4/CatalogService/postBatchV4
 Content-Type: application/json

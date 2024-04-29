@@ -15,7 +15,6 @@ service CatalogService {
     }
 
     function readOrderV4() returns array of SalesOrders;
-    // function readOrderV4() returns String;
-    action postOrderV4() returns String;
+    action postOrderV4(order: SalesOrders) returns SalesOrders;
     action postBatchV4() returns String;
 }
