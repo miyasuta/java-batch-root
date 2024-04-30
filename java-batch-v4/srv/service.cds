@@ -14,7 +14,12 @@ service CatalogService {
         price: Integer;
     }
 
+    entity BatchResponse {
+        code: Integer;
+        ID: UUID;
+    }
+
     function readOrderV4() returns array of SalesOrders;
     action postOrderV4(order: SalesOrders) returns SalesOrders;
-    action postBatchV4() returns String;
+    action postBatchV4(orders: array of SalesOrders) returns array of SalesOrders;
 }

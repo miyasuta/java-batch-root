@@ -29,7 +29,29 @@ Content-Type: application/json
 POST {{server}}/odata/v4/CatalogService/postBatchV4
 Content-Type: application/json
 
-{}
+{
+    "orders": [{
+        "orderDate": "2024-04-29",
+        "customer": "Java1",
+        "items": [
+            {
+                "product": "PC",
+                "quantity": 1,
+                "price": 1000
+            }
+        ]
+    },{
+        "orderDate": "2024-04-29",
+        "customer": "Java2",
+        "items": [
+            {
+                "product": "PC",
+                "quantity": 1,
+                "price": 1000
+            }
+        ]
+    }]
+}
 
 ###
 POST {{sales}}/odata/v2/sales/$batch
