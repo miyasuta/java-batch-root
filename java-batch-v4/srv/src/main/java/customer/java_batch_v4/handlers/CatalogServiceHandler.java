@@ -38,7 +38,7 @@ public class CatalogServiceHandler implements EventHandler {
 		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
 		DefaultSalesServiceV4Service service = new DefaultSalesServiceV4Service().withServicePath("/odata/v4/sales");
 
-		// Get request
+		// get request
 		final List<SalesOrders> salesorders = service.getAllSalesOrders()
 				.select(SalesOrders.ID,
 						SalesOrders.CUSTOMER,
@@ -47,6 +47,7 @@ public class CatalogServiceHandler implements EventHandler {
 				.execute(destination);
 		logger.info(salesorders.toString());
 
+		// msp response
 		List<cds.gen.catalogservice.SalesOrders> readorders = salesorders.stream()
 				.map(salesorder -> {
 					cds.gen.catalogservice.SalesOrders readorder = cds.gen.catalogservice.SalesOrders.create();
@@ -55,7 +56,7 @@ public class CatalogServiceHandler implements EventHandler {
 					readorder.setOrderDate(salesorder.getOrderDate());
 
 					List<cds.gen.catalogservice.OrderItems> readitems = salesorder.getItemsIfPresent()
-							.map(items -> items.stream() // List<OrderItems>をStreamに変換
+							.map(items -> items.stream()
 									.map(item -> {
 										cds.gen.catalogservice.OrderItems readitem = cds.gen.catalogservice.OrderItems
 												.create();
@@ -66,7 +67,7 @@ public class CatalogServiceHandler implements EventHandler {
 										readitem.setPrice(item.getPrice());
 										return readitem;
 									})
-									.collect(Collectors.toList())) // 変換したStreamをListに収集
+									.collect(Collectors.toList()))
 							.getOrElse(List.of());
 
 					if (readitems.size() > 0) {
@@ -82,10 +83,9 @@ public class CatalogServiceHandler implements EventHandler {
 
 	@On(event = PostOrderV4Context.CDS_NAME)
 	public void PostOrderv4(PostOrderV4Context context) {
+		logger.info("PostOrderV4 handler called");
 		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
 		DefaultSalesServiceV4Service service = new DefaultSalesServiceV4Service().withServicePath("/odata/v4/sales");
-
-		logger.info("PostOrderV4 handler called");
 
 		// map request to salesorder
 		SalesOrders salesorder = new SalesOrders();
@@ -97,19 +97,8 @@ public class CatalogServiceHandler implements EventHandler {
 			newitem.setProduct(item.getProduct());
 			newitem.setQuantity(item.getQuantity());
 			newitem.setPrice(item.getPrice());
-			salesorder.addItems(newitem);			
+			salesorder.addItems(newitem);
 		});
-
-		// context.getOrder().getItems().stream()
-		// 		.map(item -> {
-		// 			logger.info("looping items");
-		// 			logger.info(item.getProduct());
-		// 			OrderItems newitem = new OrderItems();
-		// 			newitem.setProduct(item.getProduct());
-		// 			newitem.setQuantity(item.getQuantity());
-		// 			newitem.setPrice(item.getPrice());
-		// 			return newitem;
-		// 		}).forEach(salesorder::addItems);
 
 		// post salesorder
 		ModificationResponse<SalesOrders> response = service.createSalesOrders(salesorder).execute(destination);
@@ -121,7 +110,7 @@ public class CatalogServiceHandler implements EventHandler {
 		createdorder.setOrderDate(response.getModifiedEntity().getOrderDate());
 
 		List<cds.gen.catalogservice.OrderItems> createditems = response.getModifiedEntity().getItemsIfPresent()
-				.map(items -> items.stream() // List<OrderItems>をStreamに変換
+				.map(items -> items.stream()
 						.map(item -> {
 							cds.gen.catalogservice.OrderItems createditem = cds.gen.catalogservice.OrderItems
 									.create();
@@ -132,7 +121,7 @@ public class CatalogServiceHandler implements EventHandler {
 							createditem.setPrice(item.getPrice());
 							return createditem;
 						})
-						.collect(Collectors.toList())) // 変換したStreamをListに収集
+						.collect(Collectors.toList()))
 				.getOrElse(List.of());
 
 		if (createditems.size() > 0) {
@@ -147,6 +136,7 @@ public class CatalogServiceHandler implements EventHandler {
 		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
 		DefaultSalesServiceV4Service service = new DefaultSalesServiceV4Service().withServicePath("/odata/v4/sales");
 
+		// create request
 		List<CreateRequestBuilder<SalesOrders>> createReusests = context.getOrders().stream()
 				.map(order -> {
 					SalesOrders salesorder = new SalesOrders();
@@ -174,7 +164,7 @@ public class CatalogServiceHandler implements EventHandler {
 						.addChangeset(requestArray)
 						.execute(destination);) {
 
-			// map result
+			// map response
 			List<cds.gen.catalogservice.SalesOrders> createResults = createReusests.stream().map(request -> {
 				cds.gen.catalogservice.SalesOrders salesorder = cds.gen.catalogservice.SalesOrders.create();
 				SalesOrders createResult = result.getModificationResult(request).getModifiedEntity();
@@ -183,7 +173,7 @@ public class CatalogServiceHandler implements EventHandler {
 				salesorder.setOrderDate(createResult.getOrderDate());
 
 				List<cds.gen.catalogservice.OrderItems> createditems = createResult.getItemsIfPresent()
-						.map(items -> items.stream() // List<OrderItems>をStreamに変換
+						.map(items -> items.stream()
 								.map(item -> {
 									cds.gen.catalogservice.OrderItems createditem = cds.gen.catalogservice.OrderItems
 											.create();
@@ -194,7 +184,7 @@ public class CatalogServiceHandler implements EventHandler {
 									createditem.setPrice(item.getPrice());
 									return createditem;
 								})
-								.collect(Collectors.toList())) // 変換したStreamをListに収集
+								.collect(Collectors.toList()))
 						.getOrElse(List.of());
 
 				if (createditems.size() > 0) {
