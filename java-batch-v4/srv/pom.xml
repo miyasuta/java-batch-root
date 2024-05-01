@@ -49,16 +49,27 @@
 			<groupId>com.sap.cloud.sdk.datamodel</groupId>
 			<artifactId>odata-v4-core</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
-		</dependency>	
+		</dependency>
+
+		<dependency>
+			<groupId>com.sap.cloud.sdk.cloudplatform</groupId>
+			<artifactId>connectivity-destination-service</artifactId>
+		</dependency>		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
-		</dependency>		
+		</dependency>
+		<!-- <dependency>
+			<groupId>com.sap.cds</groupId>
+			<artifactId>cds-starter-cloudfoundry</artifactId>
+		</dependency>		 -->
 	</dependencies>
 
 	<build>
