@@ -8,11 +8,47 @@ GET {{server}}/odata/v4/CatalogService/readOrderV2()
 POST {{server}}/odata/v4/CatalogService/postOrderV2
 Content-Type: application/json
 
+{
+    "order": {
+        "orderDate": "2024-05-07",
+        "customer": "Java-V2",
+        "items": [
+            {
+                "product": "PC",
+                "quantity": 1,
+                "price": 1000
+            }
+        ]
+    }
+}
+
 ###
 POST {{server}}/odata/v4/CatalogService/postBatchV2
 Content-Type: application/json
 
-{}
+{
+    "orders": [{
+        "orderDate": "2024-04-29",
+        "customer": "Java1",
+        "items": [
+            {
+                "product": "PC",
+                "quantity": 1,
+                "price": 1000
+            }
+        ]
+    },{
+        "orderDate": "2024-04-29",
+        "customer": "Java2",
+        "items": [
+            {
+                "product": "PC",
+                "quantity": 1,
+                "price": 1000
+            }
+        ]
+    }]
+}
 
 ###
 POST {{sales}}/odata/v2/sales/$batch
