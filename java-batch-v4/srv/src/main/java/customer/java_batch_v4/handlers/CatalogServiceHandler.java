@@ -39,46 +39,45 @@ public class CatalogServiceHandler implements EventHandler {
 		DefaultSalesServiceV4Service service = new DefaultSalesServiceV4Service().withServicePath("/odata/v4/sales");
 
 		// get request
-		final List<SalesOrders> salesorders = service.getAllSalesOrders()
+		final List<SalesOrders> salesOrdersResp = service.getAllSalesOrders()
 				.select(SalesOrders.ID,
 						SalesOrders.CUSTOMER,
 						SalesOrders.ORDER_DATE,
 						SalesOrders.TO_ITEMS)
 				.execute(destination);
-		logger.info(salesorders.toString());
 
 		// msp response
-		List<cds.gen.catalogservice.SalesOrders> readorders = salesorders.stream()
-				.map(salesorder -> {
-					cds.gen.catalogservice.SalesOrders readorder = cds.gen.catalogservice.SalesOrders.create();
-					readorder.setId(salesorder.getID().toString());
-					readorder.setCustomer(salesorder.getCustomer());
-					readorder.setOrderDate(salesorder.getOrderDate());
+		List<cds.gen.catalogservice.SalesOrders> salesOrdersOut = salesOrdersResp.stream()
+				.map(salesOrderResp -> {
+					cds.gen.catalogservice.SalesOrders salesOrderOut = cds.gen.catalogservice.SalesOrders.create();
+					salesOrderOut.setId(salesOrderResp.getID().toString());
+					salesOrderOut.setCustomer(salesOrderResp.getCustomer());
+					salesOrderOut.setOrderDate(salesOrderResp.getOrderDate());
 
-					List<cds.gen.catalogservice.OrderItems> readitems = salesorder.getItemsIfPresent()
-							.map(items -> items.stream()
-									.map(item -> {
-										cds.gen.catalogservice.OrderItems readitem = cds.gen.catalogservice.OrderItems
+					List<cds.gen.catalogservice.OrderItems> itemsOut = salesOrderResp.getItemsIfPresent()
+							.map(itemsResp -> itemsResp.stream()
+									.map(itemResp -> {
+										cds.gen.catalogservice.OrderItems itemOut = cds.gen.catalogservice.OrderItems
 												.create();
-										readitem.setId(item.getID().toString());
-										readitem.setOrderId(item.getOrder_ID().toString());
-										readitem.setProduct(item.getProduct());
-										readitem.setQuantity(item.getQuantity());
-										readitem.setPrice(item.getPrice());
-										return readitem;
+										itemOut.setId(itemResp.getID().toString());
+										itemOut.setOrderId(itemResp.getOrder_ID().toString());
+										itemOut.setProduct(itemResp.getProduct());
+										itemOut.setQuantity(itemResp.getQuantity());
+										itemOut.setPrice(itemResp.getPrice());
+										return itemOut;
 									})
 									.collect(Collectors.toList()))
 							.getOrElse(List.of());
 
-					if (readitems.size() > 0) {
-						readorder.setItems(readitems);
+					if (itemsOut.size() > 0) {
+						salesOrderOut.setItems(itemsOut);
 					}
 
-					return readorder;
+					return salesOrderOut;
 				})
 				.collect(Collectors.toList());
 
-		context.setResult(readorders);
+		context.setResult(salesOrdersOut);
 	}
 
 	@On(event = PostOrderV4Context.CDS_NAME)
@@ -88,46 +87,46 @@ public class CatalogServiceHandler implements EventHandler {
 		DefaultSalesServiceV4Service service = new DefaultSalesServiceV4Service().withServicePath("/odata/v4/sales");
 
 		// map request to salesorder
-		SalesOrders salesorder = new SalesOrders();
-		salesorder.setCustomer(context.getOrder().getCustomer());
-		salesorder.setOrderDate(context.getOrder().getOrderDate());
+		SalesOrders salesOrderReq = new SalesOrders();
+		salesOrderReq.setCustomer(context.getOrder().getCustomer());
+		salesOrderReq.setOrderDate(context.getOrder().getOrderDate());
 
 		context.getOrder().getItems().forEach(item -> {
-			OrderItems newitem = new OrderItems();
-			newitem.setProduct(item.getProduct());
-			newitem.setQuantity(item.getQuantity());
-			newitem.setPrice(item.getPrice());
-			salesorder.addItems(newitem);
+			OrderItems itemReq = new OrderItems();
+			itemReq.setProduct(item.getProduct());
+			itemReq.setQuantity(item.getQuantity());
+			itemReq.setPrice(item.getPrice());
+			salesOrderReq.addItems(itemReq);
 		});
 
 		// post salesorder
-		ModificationResponse<SalesOrders> response = service.createSalesOrders(salesorder).execute(destination);
+		ModificationResponse<SalesOrders> response = service.createSalesOrders(salesOrderReq).execute(destination);
 
 		// map response
-		cds.gen.catalogservice.SalesOrders createdorder = cds.gen.catalogservice.SalesOrders.create();
-		createdorder.setId(response.getModifiedEntity().getID().toString());
-		createdorder.setCustomer(response.getModifiedEntity().getCustomer());
-		createdorder.setOrderDate(response.getModifiedEntity().getOrderDate());
+		cds.gen.catalogservice.SalesOrders salesOrderOut = cds.gen.catalogservice.SalesOrders.create();
+		salesOrderOut.setId(response.getModifiedEntity().getID().toString());
+		salesOrderOut.setCustomer(response.getModifiedEntity().getCustomer());
+		salesOrderOut.setOrderDate(response.getModifiedEntity().getOrderDate());
 
-		List<cds.gen.catalogservice.OrderItems> createditems = response.getModifiedEntity().getItemsIfPresent()
-				.map(items -> items.stream()
-						.map(item -> {
-							cds.gen.catalogservice.OrderItems createditem = cds.gen.catalogservice.OrderItems
+		List<cds.gen.catalogservice.OrderItems> itemsOut = response.getModifiedEntity().getItemsIfPresent()
+				.map(itemsResp -> itemsResp.stream()
+						.map(itemResp -> {
+							cds.gen.catalogservice.OrderItems itemOut = cds.gen.catalogservice.OrderItems
 									.create();
-							createditem.setId(item.getID().toString());
-							createditem.setOrderId(item.getOrder_ID().toString());
-							createditem.setProduct(item.getProduct());
-							createditem.setQuantity(item.getQuantity());
-							createditem.setPrice(item.getPrice());
-							return createditem;
+							itemOut.setId(itemResp.getID().toString());
+							itemOut.setOrderId(itemResp.getOrder_ID().toString());
+							itemOut.setProduct(itemResp.getProduct());
+							itemOut.setQuantity(itemResp.getQuantity());
+							itemOut.setPrice(itemResp.getPrice());
+							return itemOut;
 						})
 						.collect(Collectors.toList()))
 				.getOrElse(List.of());
 
-		if (createditems.size() > 0) {
-			createdorder.setItems(createditems);
+		if (itemsOut.size() > 0) {
+			salesOrderOut.setItems(itemsOut);
 		}
-		context.setResult(createdorder);
+		context.setResult(salesOrderOut);
 	}
 
 	@On(event = PostBatchV4Context.CDS_NAME)
@@ -138,20 +137,20 @@ public class CatalogServiceHandler implements EventHandler {
 
 		// create request
 		List<CreateRequestBuilder<SalesOrders>> createReusests = context.getOrders().stream()
-				.map(order -> {
-					SalesOrders salesorder = new SalesOrders();
-					salesorder.setCustomer(order.getCustomer());
-					salesorder.setOrderDate(order.getOrderDate());
+				.map(salesOrderIn -> {
+					SalesOrders salesOrderReq = new SalesOrders();
+					salesOrderReq.setCustomer(salesOrderIn.getCustomer());
+					salesOrderReq.setOrderDate(salesOrderIn.getOrderDate());
 
-					order.getItems().stream()
-							.map(item -> {
-								OrderItems newitem = new OrderItems();
-								newitem.setProduct(item.getProduct());
-								newitem.setPrice(item.getPrice());
-								newitem.setQuantity(item.getQuantity());
-								return newitem;
-							}).forEach(salesorder::addItems);
-					return service.createSalesOrders(salesorder);
+					salesOrderIn.getItems().stream()
+							.map(itemIn -> {
+								OrderItems itemReq = new OrderItems();
+								itemReq.setProduct(itemIn.getProduct());
+								itemReq.setPrice(itemIn.getPrice());
+								itemReq.setQuantity(itemIn.getQuantity());
+								return itemReq;
+							}).forEach(salesOrderReq::addItems);
+					return service.createSalesOrders(salesOrderReq);
 				}).collect(Collectors.toList());
 
 		ModificationRequestBuilder<?>[] requestArray = new ModificationRequestBuilder<?>[createReusests.size()];
@@ -165,35 +164,35 @@ public class CatalogServiceHandler implements EventHandler {
 						.execute(destination);) {
 
 			// map response
-			List<cds.gen.catalogservice.SalesOrders> createResults = createReusests.stream().map(request -> {
-				cds.gen.catalogservice.SalesOrders salesorder = cds.gen.catalogservice.SalesOrders.create();
-				SalesOrders createResult = result.getModificationResult(request).getModifiedEntity();
-				salesorder.setId(createResult.getID().toString());
-				salesorder.setCustomer(createResult.getCustomer());
-				salesorder.setOrderDate(createResult.getOrderDate());
+			List<cds.gen.catalogservice.SalesOrders> salesOrdersOut = createReusests.stream().map(request -> {
+				cds.gen.catalogservice.SalesOrders salesOrderOut = cds.gen.catalogservice.SalesOrders.create();
+				SalesOrders salesOrderResp = result.getModificationResult(request).getModifiedEntity();
+				salesOrderOut.setId(salesOrderResp.getID().toString());
+				salesOrderOut.setCustomer(salesOrderResp.getCustomer());
+				salesOrderOut.setOrderDate(salesOrderResp.getOrderDate());
 
-				List<cds.gen.catalogservice.OrderItems> createditems = createResult.getItemsIfPresent()
-						.map(items -> items.stream()
-								.map(item -> {
-									cds.gen.catalogservice.OrderItems createditem = cds.gen.catalogservice.OrderItems
+				List<cds.gen.catalogservice.OrderItems> itemsOut = salesOrderResp.getItemsIfPresent()
+						.map(itemsResp -> itemsResp.stream()
+								.map(itemResp -> {
+									cds.gen.catalogservice.OrderItems itemOut = cds.gen.catalogservice.OrderItems
 											.create();
-									createditem.setId(item.getID().toString());
-									createditem.setOrderId(item.getOrder_ID().toString());
-									createditem.setProduct(item.getProduct());
-									createditem.setQuantity(item.getQuantity());
-									createditem.setPrice(item.getPrice());
-									return createditem;
+											itemOut.setId(itemResp.getID().toString());
+											itemOut.setOrderId(itemResp.getOrder_ID().toString());
+											itemOut.setProduct(itemResp.getProduct());
+											itemOut.setQuantity(itemResp.getQuantity());
+											itemOut.setPrice(itemResp.getPrice());
+									return itemOut;
 								})
 								.collect(Collectors.toList()))
 						.getOrElse(List.of());
 
-				if (createditems.size() > 0) {
-					salesorder.setItems(createditems);
+				if (itemsOut.size() > 0) {
+					salesOrderOut.setItems(itemsOut);
 				}
-				return salesorder;
+				return salesOrderOut;
 			}).collect(Collectors.toList());
 
-			context.setResult(createResults);
+			context.setResult(salesOrdersOut);
 		}
 
 	}
