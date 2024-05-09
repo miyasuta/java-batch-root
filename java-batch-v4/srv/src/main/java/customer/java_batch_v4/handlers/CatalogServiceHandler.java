@@ -164,9 +164,9 @@ public class CatalogServiceHandler implements EventHandler {
 						.execute(destination);) {
 
 			// map response
-			List<cds.gen.catalogservice.SalesOrders> salesOrdersOut = createReusests.stream().map(request -> {
+			List<cds.gen.catalogservice.SalesOrders> salesOrdersOut = createReusests.stream().map(salesOrderReq -> {
 				cds.gen.catalogservice.SalesOrders salesOrderOut = cds.gen.catalogservice.SalesOrders.create();
-				SalesOrders salesOrderResp = result.getModificationResult(request).getModifiedEntity();
+				SalesOrders salesOrderResp = result.getModificationResult(salesOrderReq).getModifiedEntity();
 				salesOrderOut.setId(salesOrderResp.getID().toString());
 				salesOrderOut.setCustomer(salesOrderResp.getCustomer());
 				salesOrderOut.setOrderDate(salesOrderResp.getOrderDate());
