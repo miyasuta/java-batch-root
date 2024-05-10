@@ -1,0 +1,74 @@
+@server = http://localhost:4004
+@auth = Authorization: Basic alice:
+
+
+### SalesService.SalesOrders
+GET {{server}}/odata/v4/sales/SalesOrders
+Content-Type: application/json
+{{auth}}
+
+
+### SalesService.SalesOrders
+POST {{server}}/odata/v4/sales/SalesOrders
+Content-Type: application/json
+{{auth}}
+
+{
+  "ID": "11771228-14fb-45c5-bc2d-b74ab14061d5",
+  "orderDate": "2017-05-11",
+  "customer": "customer-11771228",
+  "items": [
+    {
+      "ID": "12219321-db6d-4d22-8c4f-eda0bba39013",
+      "product": "product-12219321",
+      "quantity": 64,
+      "price": 36
+    },
+    {
+      "ID": "12219322-baa9-4bc0-85e2-6a19ada41e64",
+      "product": "product-12219322",
+      "quantity": 26,
+      "price": 13
+    }
+  ],
+  "createdAt": "2001-09-16T15:00:00.000Z",
+  "createdBy": "createdBy.70aqk@example.com",
+  "modifiedAt": "2003-02-18T15:00:00.000Z",
+  "modifiedBy": "modifiedBy.70aqk@example.com"
+}
+
+
+### SalesService.SalesOrders
+PATCH {{server}}/odata/v4/sales/SalesOrders/11771228-14fb-45c5-bc2d-b74ab14061d5
+Content-Type: application/json
+{{auth}}
+
+{
+  "ID": "11771228-14fb-45c5-bc2d-b74ab14061d5",
+  "orderDate": "2017-05-11",
+  "customer": "customer-11771228",
+  "items": [
+    {
+      "ID": "12219321-db6d-4d22-8c4f-eda0bba39013",
+      "product": "product-12219321",
+      "quantity": 64,
+      "price": 36
+    },
+    {
+      "ID": "12219322-baa9-4bc0-85e2-6a19ada41e64",
+      "product": "product-12219322",
+      "quantity": 26,
+      "price": 13
+    }
+  ],
+  "createdAt": "2001-09-16T15:00:00.000Z",
+  "createdBy": "createdBy.70aqk@example.com",
+  "modifiedAt": "2003-02-18T15:00:00.000Z",
+  "modifiedBy": "modifiedBy.70aqk@example.com"
+}
+
+
+### SalesService.SalesOrders
+DELETE {{server}}/odata/v4/sales/SalesOrders/11771228-14fb-45c5-bc2d-b74ab14061d5
+Content-Type: application/json
+{{auth}}
