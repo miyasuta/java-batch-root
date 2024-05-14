@@ -15,6 +15,7 @@ service CatalogService {
     }
     
     function readOrderV2() returns array of SalesOrders;
+    function readOrderV2Batch() returns String;
     action postOrderV2(order: SalesOrders) returns SalesOrders;
     action postBatchV2(orders: array of SalesOrders) returns array of SalesOrders;
 }

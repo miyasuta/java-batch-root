@@ -5,6 +5,9 @@
 GET {{server}}/odata/v4/CatalogService/readOrderV2()
 
 ###
+GET {{server}}/odata/v4/CatalogService/readOrderV2Batch()
+
+###
 POST {{server}}/odata/v4/CatalogService/postOrderV2
 Content-Type: application/json
 

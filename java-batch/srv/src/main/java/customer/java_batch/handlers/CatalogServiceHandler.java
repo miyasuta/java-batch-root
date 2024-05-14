@@ -15,6 +15,7 @@ import cds.gen.catalogservice.CatalogService_;
 import cds.gen.catalogservice.PostBatchV2Context;
 import cds.gen.catalogservice.PostOrderV2Context;
 import cds.gen.catalogservice.ReadOrderV2Context;
+import cds.gen.catalogservice.ReadOrderV2BatchContext;
 import io.vavr.control.Try;
 
 import org.slf4j.Logger;
@@ -30,6 +31,7 @@ import com.mycompany.vdm.namespaces.salesservicev2.batch.SalesServiceV2ServiceBa
 import com.mycompany.vdm.services.DefaultSalesServiceV2Service;
 import com.mycompany.vdm.namespaces.salesservicev2.OrderItems;
 import com.mycompany.vdm.namespaces.salesservicev2.SalesOrders;
+import com.mycompany.vdm.namespaces.salesservicev2.SalesOrdersFluentHelper;
 
 @Component
 @ServiceName(CatalogService_.CDS_NAME)
@@ -83,6 +85,26 @@ public class CatalogServiceHandler implements EventHandler {
 				.collect(Collectors.toList());
 
 		context.setResult(salesOrdersOut);
+	}
+
+	@On(event = ReadOrderV2BatchContext.CDS_NAME)
+	public void ReadOrderV2(ReadOrderV2BatchContext context) {
+		logger.info("Readv2 batch handler called");
+		HttpDestination destination = DestinationAccessor.getDestination("salesorder-srv").asHttp();
+		DefaultSalesServiceV2Service service = new DefaultSalesServiceV2Service().withServicePath("/odata/v2/sales");
+
+		SalesOrdersFluentHelper readOrdersReq = service.getAllSalesOrders()
+				.select(SalesOrders.ID,
+						SalesOrders.CUSTOMER,
+						SalesOrders.ORDER_DATE,
+						SalesOrders.TO_ITEMS);
+
+		// create batch request
+		BatchResponse result = service.batch()
+							.addReadOperations(readOrdersReq)
+							.executeRequest(destination);
+		List<SalesOrders> salesordersResp = result.getReadResult(readOrdersReq);
+		context.setResult(salesordersResp.toString());
 	}
 
 	@On(event = PostOrderV2Context.CDS_NAME)
