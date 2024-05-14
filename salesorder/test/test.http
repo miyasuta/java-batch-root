@@ -1,4 +1,7 @@
 @server=http://localhost:4004
+###
+HEAD {{server}}/odata/v4/sales
+x-csrf-token: fetch
 
 ###
 POST {{server}}/odata/v4/sales/SalesOrders

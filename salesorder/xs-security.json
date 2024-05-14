@@ -1,5 +1,11 @@
 {
   "scopes": [],
   "attributes": [],
-  "role-templates": []
+  "role-templates": [],
+  "oauth2-configuration": {
+      "redirect-uris": [
+        "https://*.hana.ondemand.com/login/callback",
+        "https://oauth.pstmn.io/v1/callback"
+      ]
+  }
 }

@@ -36,6 +36,22 @@ modules:
     requires:
       - name: salesorder-db
 
+  - name: salesorder
+    type: approuter.nodejs
+    path: app/router
+    parameters:
+      keep-existing-routes: true
+      disk-quota: 256M
+      memory: 256M
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          name: srv-api # must be used in xs-app.json as well
+          url: ~{srv-url}
+          forwardAuthToken: true
+      - name: salesorder-auth
+
 resources:
   - name: salesorder-db
     type: com.sap.xs.hdi-container
